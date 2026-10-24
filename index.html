@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#002776">
+  <meta name="description" content="Data-Cred - Controle de empréstimos">
+  <meta name="robots" content="noindex">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Data-Cred">
+  <title>Data-Cred</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icons/favicon-48.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #f4f6fb;
+      font-family: Arial, sans-serif;
+    }
+
+    .app {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding-top: env(safe-area-inset-top);
+      background: #002776;
+    }
+
+    .loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+      color: #002776;
+      background: #f4f6fb;
+      z-index: 1;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .loading img {
+      width: 72px;
+      height: 72px;
+      border-radius: 16px;
+    }
+
+    .loading p {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 4px solid #d3dbef;
+      border-top-color: #002776;
+      border-radius: 50%;
+      animation: girar 0.8s linear infinite;
+    }
+
+    .ajuda {
+      display: none;
+      max-width: 320px;
+      font-size: 13px;
+      color: #475569;
+    }
+
+    .ajuda a {
+      display: inline-block;
+      margin-top: 10px;
+      background: #002776;
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      border: 0;
+      background: white;
+    }
+
+    @keyframes girar {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="loading" id="loading">
+      <img src="./icons/icon-192.png" alt="">
+      <div class="spinner" id="spinner"></div>
+      <p id="mensagem">Carregando o Data-Cred...</p>
+      <div class="ajuda" id="ajuda">
+        Está demorando? Talvez seja preciso entrar na sua conta Google.
+        <br>
+        <a id="abrirDireto" href="#" target="_top">Abrir o Data-Cred</a>
+      </div>
+    </div>
+
+    <iframe
+      id="datacred"
+      title="Data-Cred"
+      allow="camera; geolocation; clipboard-write"
+      allowfullscreen>
+    </iframe>
+  </main>
+
+  <script>
+    // Link do app publicado no Google Apps Script (termina em /exec).
+    // Para trocar de versão do app, altere só esta linha.
+    const APP_URL = "https://script.google.com/macros/s/AKfycbzDx_LjXQV3z6AWUkmgCYa2GKnEPp6BtXIlJXkYcN8WF26lEpRUMvKx8MKmw0BwQxKjkw/exec";
+
+    const appFrame = document.getElementById("datacred");
+    const loading = document.getElementById("loading");
+    const ajuda = document.getElementById("ajuda");
+
+    document.getElementById("abrirDireto").href = APP_URL;
+
+    if (!navigator.onLine) {
+      document.getElementById("spinner").style.display = "none";
+      document.getElementById("mensagem").textContent =
+        "Sem internet. Conecte-se e abra o Data-Cred de novo.";
+    } else {
+      appFrame.addEventListener("load", function () {
+        loading.style.display = "none";
+      });
+      appFrame.src = APP_URL;
+
+      // Se não carregar em 10 segundos, oferece abrir o app direto.
+      setTimeout(function () {
+        ajuda.style.display = "block";
+      }, 10000);
+    }
+
+    window.addEventListener("online", function () {
+      location.reload();
+    });
+
+    if ("serviceWorker" in navigator && location.protocol === "https:") {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./sw.js")
+          .catch(function (erro) {
+            console.error("Erro ao registrar Service Worker:", erro);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
