@@ -1,6 +1,6 @@
 // Guarda só a "casca" do app (esta página, ícones e manifest).
 // O Data-Cred em si vem sempre do Google Apps Script, nunca do cache.
-const CACHE_NAME = "datacred-shell-v1";
+const CACHE_NAME = "datacred-shell-v2";
 const ARQUIVOS = [
   "./",
   "./index.html",
