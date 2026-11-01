@@ -144,10 +144,10 @@
       document.getElementById("mensagem").textContent =
         "Sem internet. Conecte-se e abra o Data-Cred de novo.";
     } else {
-      appFrame.addEventListener("load", function () {
-        loading.style.display = "none";
-      });
-      appFrame.src = APP_URL;
+      // Abre o Data-Cred direto (sem marco): assim o celular compartilha a
+      // imagem do comprovante. Para voltar ao modo com marco, troque esta
+      // linha por: appFrame.src = APP_URL;
+      location.replace(APP_URL);
 
       // Se não carregar em 10 segundos, oferece abrir o app direto.
       setTimeout(function () {
