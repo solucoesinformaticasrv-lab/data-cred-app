@@ -155,6 +155,30 @@
       }, 10000);
     }
 
+    // COMPARTILHAR COMPROVANTE
+    // Dentro do iframe o celular só compartilha "texto" (a imagem se perde).
+    // Por isso o Data-Cred manda a imagem para esta página, que compartilha
+    // a imagem de verdade. Só aceita mensagens vindas do Apps Script.
+    window.addEventListener("message", function (event) {
+      const dados = event.data || {};
+      if (dados.tipo !== "datacred-compartilhar") return;
+      if (!/\.googleusercontent\.com$/.test(new URL(event.origin).hostname)) return;
+
+      const responder = function (resultado) {
+        try { event.source.postMessage({ tipo: "datacred-compartilhar-resultado", id: dados.id, resultado: resultado }, event.origin); } catch (e) {}
+      };
+      responder("recebido");
+
+      const arquivo = dados.arquivo;
+      let pode = false;
+      try { pode = !!(arquivo && navigator.canShare && navigator.canShare({ files: [arquivo] })); } catch (e) {}
+      if (!pode) { responder("mostrar"); return; }
+
+      navigator.share({ files: [arquivo] })
+        .then(function () { responder("compartilhado"); })
+        .catch(function (erro) { responder(erro && erro.name === "AbortError" ? "cancelado" : "mostrar"); });
+    });
+
     window.addEventListener("online", function () {
       location.reload();
     });
