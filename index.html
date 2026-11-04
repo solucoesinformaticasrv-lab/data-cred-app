@@ -179,6 +179,21 @@
         .catch(function (erro) { responder(erro && erro.name === "AbortError" ? "cancelado" : "mostrar"); });
     });
 
+    // ABRIR WHATSAPP
+    // O Data-Cred pede para esta página abrir o link do WhatsApp. Aberto daqui
+    // (e não de dentro do quadro do Apps Script) o Chrome atende todo toque e
+    // mostra a escolha entre WhatsApp e WhatsApp Business.
+    // Só aceita links de conversa do WhatsApp vindos do Apps Script.
+    window.addEventListener("message", function (event) {
+      const dados = event.data || {};
+      if (dados.tipo !== "datacred-abrir-link") return;
+      if (!/\.googleusercontent\.com$/.test(new URL(event.origin).hostname)) return;
+      const url = String(dados.url || "");
+      if (!/^(intent:\/\/send\/\?|whatsapp:\/\/send\?|https:\/\/api\.whatsapp\.com\/send\?)/.test(url)) return;
+      try { event.source.postMessage({ tipo: "datacred-abrir-link-resultado", id: dados.id }, event.origin); } catch (e) {}
+      window.location.href = url;
+    });
+
     window.addEventListener("online", function () {
       location.reload();
     });
